@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Product } from './products/products.entity';
 import { CatalogModule } from './products/catalog.module';
+import { CartModule } from './cart/cart.module';
+import { Cart } from './cart/cart.entity';
 
 @Module({
   imports: [
@@ -15,7 +17,8 @@ import { CatalogModule } from './products/catalog.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       entities: [
-        Product
+        Product,
+        Cart
       ],
       extra: {
         ssl: {
@@ -25,7 +28,8 @@ import { CatalogModule } from './products/catalog.module';
       logging: true,
       synchronize: process.env.NODE_ENV === 'production' ? false : true
     }),
-    CatalogModule
+    CatalogModule,
+    CartModule
   ],
   controllers: [
   ],
