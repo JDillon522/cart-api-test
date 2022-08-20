@@ -1,7 +1,8 @@
 import { Controller, Get, HttpException, Param, Post } from '@nestjs/common';
 import { Product } from './products.entity';
-import { CatalogService as CatalogService } from './catalog.service';
+
 import { IGetCatalogProducts, IGetCatalogSize } from './catalog';
+import { CatalogService } from '../services/catalog.service';
 
 @Controller('catalog')
 export class CatalogController {

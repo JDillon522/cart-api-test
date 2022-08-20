@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Product } from './products.entity';
+import { In, Repository } from 'typeorm';
+import { ICartProduct } from '../cart/cart';
+import { Product } from '../products/products.entity';
 
 @Injectable()
 export class CatalogService {
@@ -34,4 +35,16 @@ export class CatalogService {
     return size;
   }
 
+  public async getProductsForCart(products) {
+    const ids = products.map(product => product.product_id);
+
+    const items = await this.productRepo.createQueryBuilder('product')
+                            .setFindOptions({
+                              where: {
+                                id: In(ids)
+                              }
+                            })
+                            .getMany();
+    return items as unknown as ICartProduct[];
+  }
 }
