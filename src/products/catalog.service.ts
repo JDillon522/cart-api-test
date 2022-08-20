@@ -26,4 +26,12 @@ export class CatalogService {
     return product;
   }
 
+  public async getCatalogSize(): Promise<number> {
+    const size = await this.productRepo.createQueryBuilder('product')
+                          .select()
+                          .getCount();
+
+    return size;
+  }
+
 }
