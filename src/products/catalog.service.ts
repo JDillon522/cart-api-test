@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './products.entity';
-import { productsSeed } from './seed';
 
 @Injectable()
-export class ProductsService {
+export class CatalogService {
 
   constructor(
     @InjectRepository(Product)
@@ -18,5 +17,13 @@ export class ProductsService {
     return products;
   }
 
+  public async getProductById(id: number): Promise<Product> {
+    const product = await this.productRepo.createQueryBuilder('product')
+                            .select()
+                            .where('product.id = :id', { id })
+                            .getOne();
+
+    return product;
+  }
 
 }

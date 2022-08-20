@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Product } from './products/products.entity';
-import { ProductsModule } from './products/products.module';
+import { CatalogModule } from './products/catalog.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { ProductsModule } from './products/products.module';
       logging: true,
       synchronize: process.env.NODE_ENV === 'production' ? false : true
     }),
-    ProductsModule
+    CatalogModule
   ],
   controllers: [
   ],
