@@ -17,11 +17,16 @@ export class CartService {
     return randomUUID();
   }
 
-  public async getCartItemsForUser(userId: string): Promise<Cart[]> {
-    const cart = await this.cartRepo.createQueryBuilder('cart')
+  public async getCartItemsForUser(userId: string, id?: string): Promise<Cart[]> {
+    let cart = await this.cartRepo.createQueryBuilder('cart')
                             .select()
                             .where('cart.user_id = :id', { id: userId })
                             .getMany();
+
+    if (id) {
+      cart = cart.filter(product => product.product_id === Number(id));
+    }
+
     return cart;
   }
 

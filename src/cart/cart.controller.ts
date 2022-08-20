@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Param, Post, Res } from '@nestjs/common';
 import { Cookies } from '../decorators/cookie.decorator';
 import { CatalogService } from '../services/catalog.service';
 import { IBaseCartResponse, ICartProduct, INewProduct } from './cart';
@@ -13,9 +13,9 @@ export class CartController {
   ) { }
 
   // TODO add response interface
-  @Get('')
-  public async getCartForUser(@Cookies('userId') userId: string) {
-    const cartItems = await this.cartService.getCartItemsForUser(userId);
+  @Get(['', 'item/:id'])
+  public async getCartItemsForUser(@Cookies('userId') userId: string, @Param('id') id: string) {
+    const cartItems = await this.cartService.getCartItemsForUser(userId, id);
     const products: ICartProduct[] = await this.catalogService.getProductsForCart(cartItems);
 
     // Map quantity from cart items to products
