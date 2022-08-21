@@ -14,7 +14,15 @@ export class CartController {
 
   // TODO add response interface
   @Get(['', 'items/:id'])
-  public async getCartItemsForUser(@Cookies('userId') userId: string, @Param('id') id: string) {
+  public async getCartItemsForUser(
+    @Cookies('userId') userId: string,
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res
+  ) {
+    if (!userId) {
+      userId = this.cartService.generateUserId();
+      res.cookie('userId', userId);
+    }
     return await this._getCartItemsForUser(userId, id);
   }
 
@@ -86,7 +94,12 @@ export class CartController {
 
     const totalCost = products.reduce((prev, current) => prev + (current.price * current.quantity), 0)
 
-    if (!products.length) {
+    /**
+     * NOTE: the spec calls for it to fail if the cart is empty
+     * I turned it off because I need a blank response on the client
+     * I'm only keeping it on for getting a single product from the cart, which makes sense
+     */
+    if (id && !products.length) {
       throw new HttpException({ success: false }, errorStatus);
     }
 
