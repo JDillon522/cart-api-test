@@ -13,7 +13,9 @@ async function bootstrap() {
     stopAtFirstError: true,
     whitelist: true
   }));
-  app.enableCors();
+  app.enableCors({
+    exposedHeaders: 'CartId, Cartid, cartId'
+  });
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
