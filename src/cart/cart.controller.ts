@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, Param, Post, Put, Res, Headers } from '@nestjs/common';
 import { Cookies } from '../decorators/cookie.decorator';
 import { CatalogService } from '../services/catalog.service';
 import { IBaseCartResponse, ICartProduct, NewProduct, NewProductRequest } from './cart';
@@ -15,20 +15,20 @@ export class CartController {
   // TODO add response interface
   @Get(['', 'items/:id'])
   public async getCartItemsForUser(
-    @Cookies('userId') userId: string,
+    @Headers('cartId') userId: string,
     @Param('id') id: string,
     @Res({ passthrough: true }) res
   ) {
     if (!userId) {
       userId = this.cartService.generateUserId();
-      res.cookie('userId', userId);
+      res.setHeader('cartId', userId);
     }
     return await this._getCartItemsForUser(userId, id);
   }
 
   @Get('userId')
   public generateUserId(@Res({ passthrough: true }) res): IBaseCartResponse {
-    res.cookie('userId', this.cartService.generateUserId());
+    res.setHeader('cartId', this.cartService.generateUserId());
     return {
       success: true
     };
@@ -36,9 +36,14 @@ export class CartController {
 
 
   @Post('items')
-  public async addProductsToCart(@Cookies('userId') userId: string, @Body() req: NewProductRequest): Promise<IBaseCartResponse> {
+  public async addProductsToCart(
+    @Headers('cartId') userId: string,
+    @Body() req: NewProductRequest,
+    @Res({ passthrough: true }) res
+  ): Promise<IBaseCartResponse> {
     if (!userId) {
       userId = this.cartService.generateUserId();
+      res.setHeader('cartId', userId);
     }
 
     const response: { id: number }[] = await this.cartService.addProductToCart(userId, req.products);
@@ -53,7 +58,7 @@ export class CartController {
   }
 
   @Delete('items/:id')
-  public async removeProductFromCart(@Cookies('userId') userId: string, @Param('id') id: string): Promise<IBaseCartResponse> {
+  public async removeProductFromCart(@Headers('cartId') userId: string, @Param('id') id: string): Promise<IBaseCartResponse> {
     const del = await this.cartService.removeProductFromCart(userId, id);
 
     return {
@@ -63,7 +68,7 @@ export class CartController {
 
   @Put('items/:id/:qty')
   public async updateCartProductQuantity(
-    @Cookies('userId') userId: string,
+    @Headers('cartId') userId: string,
     @Param('id') productId: string,
     @Param('qty') qty: string
   ): Promise<IBaseCartResponse> {
@@ -75,7 +80,7 @@ export class CartController {
   }
 
   @Post('checkout')
-  public async checkout(@Cookies('userId') userId: string) {
+  public async checkout(@Headers('cartId') userId: string) {
     const cart = await this._getCartItemsForUser(userId, null, 501);
     const checkout = await this.cartService.checkout(userId);
 
