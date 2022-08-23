@@ -9,7 +9,7 @@ export class Cart {
   id: string;
 
   @Column()
-  user_id: string;
+  cart_id: string;
 
   @Column()
   product_id: number;

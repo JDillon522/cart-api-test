@@ -13,14 +13,14 @@ export class CartService {
     private cartRepo: Repository<Cart>
   ) { }
 
-  public generateUserId(): string {
+  public generateCartId(): string {
     return randomUUID();
   }
 
-  public async getCartItemsForUser(userId: string, id?: string): Promise<Cart[]> {
+  public async getCartItemsForUser(cartId: string, id?: string): Promise<Cart[]> {
     let cart = await this.cartRepo.createQueryBuilder('cart')
                             .select()
-                            .where('cart.user_id = :id', { id: userId })
+                            .where('cart.cart_id = :id', { id: cartId })
                             .getMany();
 
     if (id) {
@@ -34,17 +34,17 @@ export class CartService {
    * Add products to the cart. If a user has already added a product DO NOT return an error,
    * increment its quantity
    *
-   * @param userId the user's UUID generated for the cart
+   * @param cartId the user's UUID generated for the cart
    * @param products the array of products to add
    * @returns
    */
-  public async addProductToCart(userId: string, products: NewProduct[]): Promise<{ id: number }[]> {
-    products.forEach(product => product.user_id = userId);
+  public async addProductToCart(cartId: string, products: NewProduct[]): Promise<{ id: number }[]> {
+    products.forEach(product => product.cart_id = cartId);
     const saved: { id: number }[] = [];
 
     for await (const product of products) {
       const productExists = await this.cartRepo.createQueryBuilder('cart').select()
-                                      .where('cart.user_id = :userId', { userId })
+                                      .where('cart.cart_id = :cartId', { cartId })
                                       .andWhere('cart.product_id = :productId', { productId: product.product_id })
                                       .getOne();
 
@@ -73,11 +73,11 @@ export class CartService {
     return saved;
   }
 
-  public async removeProductFromCart(userId: string, id: string) {
+  public async removeProductFromCart(cartId: string, id: string) {
     const query = await this.cartRepo.createQueryBuilder('cart')
                           .delete()
                           .from(Cart)
-                          .where('user_id = :userId', { userId: userId })
+                          .where('cart_id = :cartId', { cartId: cartId })
                           .andWhere('product_id = :id', { id: Number(id) })
                           .execute()
 
@@ -86,11 +86,11 @@ export class CartService {
 
 
 
-  public async updateCartProductQuantity(userId: string, productId: string, qty: number) {
+  public async updateCartProductQuantity(cartId: string, productId: string, qty: number) {
     const query = await this.cartRepo.createQueryBuilder('cart')
                                 .update(Cart)
                                 .where('cart.product_id = :id', { id: productId })
-                                .andWhere('cart.user_id = :userId', { userId })
+                                .andWhere('cart.cart_id = :cartId', { cartId })
                                 .set({
                                   quantity: qty
                                 })
@@ -99,11 +99,11 @@ export class CartService {
     return query;
   }
 
-  public async checkout(userId: string) {
+  public async checkout(cartId: string) {
     const query = await this.cartRepo.createQueryBuilder()
                               .delete()
                               .from(Cart)
-                              .where('user_id = :userId', { userId })
+                              .where('cart_id = :cartId', { cartId })
                               .execute()
 
     return query;

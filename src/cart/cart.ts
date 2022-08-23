@@ -33,7 +33,7 @@ export class NewProduct {
 
   // @IsUUID('all')
   // @IsEmpty()
-  user_id: string;
+  cart_id: string;
 }
 
 export interface ICartProduct {

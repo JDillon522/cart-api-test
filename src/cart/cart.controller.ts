@@ -15,20 +15,20 @@ export class CartController {
   // TODO add response interface
   @Get(['', 'items/:id'])
   public async getCartItemsForUser(
-    @Headers('cartId') userId: string,
+    @Headers('cartId') cartId: string,
     @Param('id') id: string,
     @Res({ passthrough: true }) res
   ) {
-    if (!userId) {
-      userId = this.cartService.generateUserId();
-      res.setHeader('cartId', userId);
+    if (!cartId) {
+      cartId = this.cartService.generateCartId();
+      res.setHeader('cartId', cartId);
     }
-    return await this._getCartItemsForUser(userId, id);
+    return await this._getCartItemsForUser(cartId, id);
   }
 
-  @Get('userId')
-  public generateUserId(@Res({ passthrough: true }) res): IBaseCartResponse {
-    res.setHeader('cartId', this.cartService.generateUserId());
+  @Get('cartId')
+  public generatecartId(@Res({ passthrough: true }) res): IBaseCartResponse {
+    res.setHeader('cartId', this.cartService.generateCartId());
     return {
       success: true
     };
@@ -37,16 +37,16 @@ export class CartController {
 
   @Post('items')
   public async addProductsToCart(
-    @Headers('cartId') userId: string,
+    @Headers('cartId') cartId: string,
     @Body() req: NewProductRequest,
     @Res({ passthrough: true }) res
   ): Promise<IBaseCartResponse> {
-    if (!userId) {
-      userId = this.cartService.generateUserId();
-      res.setHeader('cartId', userId);
+    if (!cartId) {
+      cartId = this.cartService.generateCartId();
+      res.setHeader('cartId', cartId);
     }
 
-    const response: { id: number }[] = await this.cartService.addProductToCart(userId, req.products);
+    const response: { id: number }[] = await this.cartService.addProductToCart(cartId, req.products);
 
     if (!response.length) {
       throw new HttpException({ success: false }, 501);
@@ -58,8 +58,8 @@ export class CartController {
   }
 
   @Delete('items/:id')
-  public async removeProductFromCart(@Headers('cartId') userId: string, @Param('id') id: string): Promise<IBaseCartResponse> {
-    const del = await this.cartService.removeProductFromCart(userId, id);
+  public async removeProductFromCart(@Headers('cartId') cartId: string, @Param('id') id: string): Promise<IBaseCartResponse> {
+    const del = await this.cartService.removeProductFromCart(cartId, id);
 
     return {
       success: true
@@ -68,11 +68,11 @@ export class CartController {
 
   @Put('items/:id/:qty')
   public async updateCartProductQuantity(
-    @Headers('cartId') userId: string,
+    @Headers('cartId') cartId: string,
     @Param('id') productId: string,
     @Param('qty') qty: string
   ): Promise<IBaseCartResponse> {
-    const res = await this.cartService.updateCartProductQuantity(userId, productId, Number(qty));
+    const res = await this.cartService.updateCartProductQuantity(cartId, productId, Number(qty));
 
     return {
       success: true
@@ -80,15 +80,15 @@ export class CartController {
   }
 
   @Post('checkout')
-  public async checkout(@Headers('cartId') userId: string) {
-    const cart = await this._getCartItemsForUser(userId, null, 501);
-    const checkout = await this.cartService.checkout(userId);
+  public async checkout(@Headers('cartId') cartId: string) {
+    const cart = await this._getCartItemsForUser(cartId, null, 501);
+    const checkout = await this.cartService.checkout(cartId);
 
     return cart;
   }
 
-  private async _getCartItemsForUser(userId: string, id?: string, errorStatus = 404) {
-    const cartItems = await this.cartService.getCartItemsForUser(userId, id);
+  private async _getCartItemsForUser(cartId: string, id?: string, errorStatus = 404) {
+    const cartItems = await this.cartService.getCartItemsForUser(cartId, id);
     const products: ICartProduct[] = await this.catalogService.getProductsForCart(cartItems);
 
     // Map quantity from cart items to products
